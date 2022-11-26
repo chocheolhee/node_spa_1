@@ -29,9 +29,9 @@ const create = async (req, res) => {
 const findAll = async (req, res) => {
 
     try {
-        let post = await Post.find().select('title user createdAt').sort({"createAt": -1})
+        const posts = await Post.find().select('title user createdAt').sort({"createAt": -1})
 
-        return res.status(200).json(post)
+        return res.status(200).json(posts)
     } catch (error) {
         console.error(error);
         return res.status(500).json({result: 'fail', message: "server error"})
@@ -45,7 +45,7 @@ const findOne = async (req, res) => {
     const {postId} = req.params;
 
     try {
-        let post = await Post.findById(postId).select('title user createdAt content');
+        const post = await Post.findById(postId).select('title user createdAt content');
 
         return res.status(200).json(post)
     } catch (error) {
@@ -62,7 +62,7 @@ const update = async (req, res) => {
     const {password, title, content} = req.body;
 
     try {
-        let post = await Post.findById(postId);
+        const post = await Post.findById(postId);
 
         if (post.password !== password) {
             return res.status(400).json({message: "비밀번호가 틀렸습니다."})
@@ -80,12 +80,12 @@ const update = async (req, res) => {
 /**
  * 게시글 삭제
  */
-const del = async (req, res) => {
+const remove = async (req, res) => {
     const {postId} = req.params;
     const {password} = req.body
 
     try {
-        let post = await Post.findById(postId);
+        const post = await Post.findById(postId);
 
         if (post.password !== password) {
             return res.status(400).json({message: "비밀번호가 틀렸습니다."})
@@ -104,6 +104,6 @@ router.post("/", create);
 router.get("/", findAll);
 router.get('/:postId', findOne)
 router.patch('/:postId', update)
-router.delete('/:postId', del)
+router.delete('/:postId', remove)
 
 module.exports = router;

@@ -1,19 +1,15 @@
 const express = require('express');
 const app = express();
-const port = 3000;
 const connect = require("./schemas");
-const postRoutes = require('./routes/posts')
-const commentRoutes = require('./routes/comments')
+const apiRoute = require("./routes")
+
+require('dotenv').config();
+const port = process.env.PORT || 3000
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/api/posts',postRoutes)
-app.use('/api/comments',commentRoutes)
-
-// app.get('/', (req, res) => {
-//     res.send('hi!');
-// });
+app.use('/api', apiRoute);
 
 connect(); // mongoose connection
 app.listen(port, () => {

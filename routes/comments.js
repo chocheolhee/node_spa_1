@@ -14,7 +14,7 @@ const create = async (req, res) => {
         return res.status(400).json({message: "댓글 내용을 입력해주세요."})
     }
     try {
-        let post = await Post.findById(postId);
+        const post = await Post.findById(postId);
 
         if (post == null) {
             return res.status(400).json({message: "게시글이 없습니다."})
@@ -40,9 +40,9 @@ const create = async (req, res) => {
 const findAll = async (req, res) => {
 
     try {
-        let comment = await Comment.find().select('user content postId createdAt').sort({"createAt": -1})
+        const comments = await Comment.find().select('user content postId createdAt').sort({"createAt": -1})
 
-        return res.status(200).json(comment)
+        return res.status(200).json(comments)
     } catch (error) {
         console.error(error);
         return res.status(500).json({result: 'fail', message: "server error"})
@@ -72,7 +72,7 @@ const update = async (req, res) => {
 /**
  * 댓글 삭제
  */
-const del = async (req, res) => {
+const remove = async (req, res) => {
     const {commentId} = req.params;
     try {
         await Comment.deleteOne({"_id": commentId});
@@ -88,6 +88,6 @@ const del = async (req, res) => {
 router.post("/:postId", create);
 router.get("/", findAll);
 router.patch('/:commentId', update)
-router.delete('/:commentId', del)
+router.delete('/:commentId', remove)
 
 module.exports = router;
