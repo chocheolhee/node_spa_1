@@ -1,0 +1,23 @@
+const mongoose = require("mongoose");
+
+const commentSchema = new mongoose.Schema({
+    user: {
+        type: String,
+        required: true,
+    },
+    password: {
+        type: String
+    },
+    content: {
+        type: String
+    },
+    postId: {
+        type: String
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+module.exports = mongoose.model("Comment", commentSchema);
