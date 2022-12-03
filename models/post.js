@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             type: DataTypes.INTEGER,
         },
-
+        title: DataTypes.STRING,
+        content: DataTypes.STRING,
     }, {
         sequelize,
         modelName: 'Post',

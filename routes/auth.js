@@ -93,9 +93,9 @@ const login = async (req, res) => {
         }
 
         const token = jwt.sign({userId: user.userId}, "mysecretkey")
-        res.cookies('token', token);
+        res.cookie('token', token);
 
-        return res.status(200).json({result: "success"})
+        return res.status(200).json({result: "success", "token": token})
     } catch (error) {
         console.error(error);
         return res.status(500).json({errorMessage: "로그인에 실패하였습니다."});
