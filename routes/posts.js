@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../schemas/post')
+const authMiddleware = require("../middlewares/auth-middleware");
 
 /**
  * 게시글 작성
@@ -29,7 +30,7 @@ const create = async (req, res) => {
 const findAll = async (req, res) => {
 
     try {
-        const posts = await Post.find().select('title user createdAt').sort({"createAt": -1})
+        const posts = await Post.find().select('title user createdAt').sort({"createdAt": -1})
 
         return res.status(200).json(posts)
     } catch (error) {
@@ -100,10 +101,10 @@ const remove = async (req, res) => {
     }
 }
 
-router.post("/", create);
+router.post("/", authMiddleware, create);
 router.get("/", findAll);
 router.get('/:postId', findOne)
-router.patch('/:postId', update)
-router.delete('/:postId', remove)
+router.patch('/:postId', authMiddleware, update)
+router.delete('/:postId', authMiddleware, remove)
 
 module.exports = router;
