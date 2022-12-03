@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Post = require('../schemas/post')
+const {Post, User} = require('../models')
 const authMiddleware = require("../middlewares/auth-middleware");
 
 /**
  * 게시글 작성
  */
 const create = async (req, res) => {
-    const {user, password, title, content} = req.body;
+    const {title, content} = req.body;
+    const user = res.locals.user;
 
     try {
         await Post.create({
-            user: user,
-            password: password,
             title: title,
-            content: content
+            content: content,
+            userId: user.id
         });
 
         return res.status(200).json({result: 'success', message: '게시글 생성 성공'})
@@ -30,9 +30,23 @@ const create = async (req, res) => {
 const findAll = async (req, res) => {
 
     try {
-        const posts = await Post.find().select('title user createdAt').sort({"createdAt": -1})
+        /**
+         * 배열 안에 오브젝트형식 {"data":[{"postId": 2,"userId": 1,"nickname": "Developer"
+         *                            ,"title": "안녕하세요 2번째 게시글 제목입니다.","createdAt": "2022-07-25T07:45:56.000Z",
+         *                            "updatedAt": "2022-07-25T07:45:56.000Z","likes": 0}]
+         *
+         */
+        const posts = await Post.findAll({
+            include: [{
+                model: User,
+                attributes: ['nickname']
+            }],
+            order: [['id', 'DESC']]
+        })
+        const temp = []
+        posts.map((x) => temp.push(x))
 
-        return res.status(200).json(posts)
+        return res.status(200).json({result: "success", date: temp})
     } catch (error) {
         console.error(error);
         return res.status(500).json({result: 'fail', message: "server error"})
@@ -46,7 +60,18 @@ const findOne = async (req, res) => {
     const {postId} = req.params;
 
     try {
-        const post = await Post.findById(postId).select('title user createdAt content');
+        const post = await Post.findOne({
+            include: [{
+                model: User,
+                attributes: ['nickname'],
+            }],
+            where: {
+                id: postId
+            }
+        })
+        if (post === null) {
+            return res.status(400).json({result: 'fail', message: '게시글이 없습니다.'})
+        }
 
         return res.status(200).json(post)
     } catch (error) {
@@ -60,16 +85,13 @@ const findOne = async (req, res) => {
  */
 const update = async (req, res) => {
     const {postId} = req.params;
-    const {password, title, content} = req.body;
+    const {title, content} = req.body;
 
     try {
-        const post = await Post.findById(postId);
-
-        if (post.password !== password) {
-            return res.status(400).json({message: "비밀번호가 틀렸습니다."})
+        const post = await Post.update({title, content}, {where: {id: postId}});
+        if (post[0] === 0) {
+            return res.status(400).json({result: 'fail', message: '게시글이 없습니다.'})
         }
-
-        await Post.updateOne({_id: postId}, {$set: {title, content}});
 
         return res.status(200).json({result: 'success', message: '게시글 수정 성공'})
     } catch (error) {
@@ -83,16 +105,22 @@ const update = async (req, res) => {
  */
 const remove = async (req, res) => {
     const {postId} = req.params;
-    const {password} = req.body
 
     try {
-        const post = await Post.findById(postId);
-
-        if (post.password !== password) {
-            return res.status(400).json({message: "비밀번호가 틀렸습니다."})
+        const post = await Post.findOne({
+            where: {
+                id: postId
+            }
+        });
+        if (post === null) {
+            return res.status(400).json({result: 'fail', message: '게시글이 없습니다.'})
         }
 
-        await Post.deleteOne({"_id": postId});
+        await Post.destroy({
+            where: {
+                id: postId
+            }
+        })
         return res.status(200).json({result: 'success', message: '게시글 삭제 성공'})
 
     } catch (error) {
