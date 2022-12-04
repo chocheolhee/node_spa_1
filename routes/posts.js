@@ -125,6 +125,37 @@ const remove = async (req, res) => {
 }
 
 /**
+ * 좋아요 게시글 조회
+ */
+const likeFindAll = async (req, res) => {
+    const user = res.locals.user;
+
+    try {
+        const post = await PostLike.findAll({
+            include: [{
+                model: Post,
+            }],
+            where: {
+                userId: user.id
+            },
+            order: [[{model: Post}, 'likeCount', 'DESC']]
+        })
+
+        if (post === null) {
+            return res.status(400).json({result: 'fail', message: '좋아요 게시글이 없습니다.'})
+        }
+
+        const data = []
+        post.map((x) => data.push(x.Post))
+
+        return res.status(200).json(data)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({result: 'fail', message: "server error"})
+    }
+}
+
+/**
  * 게시글 좋아요 API
  * - 로그인 토큰을 전달했을 때에만 좋아요 할 수 있게 하기 --> ok
  * - 로그인 토큰에 해당하는 사용자가 좋아요 한 글에 한해서, 좋아요 취소 할 수 있게 하기
@@ -216,6 +247,7 @@ const removePostLike = async (req, res) => {
 
 router.post("/", authMiddleware, create);
 router.get("/", findAll);
+router.get("/like", authMiddleware, likeFindAll);
 router.get('/:postId', findOne)
 router.patch('/:postId', authMiddleware, update)
 router.delete('/:postId', authMiddleware, remove)
