@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.hasMany(models.Post, { foreignKey: 'userId', sourceKey: 'id' });
       this.hasMany(models.Comment, { foreignKey: 'userId', sourceKey: 'id' });
+      this.hasMany(models.PostLike, { foreignKey: 'userId', sourceKey: 'id' });
     }
   };
   User.init({
