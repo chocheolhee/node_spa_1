@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const {Post, User, PostLike} = require('../models')
 const authMiddleware = require("../middlewares/auth-middleware");
-const {where} = require("sequelize");
 
 /**
  * 게시글 작성
@@ -31,12 +30,6 @@ const create = async (req, res) => {
 const findAll = async (req, res) => {
 
     try {
-        /**
-         * 배열 안에 오브젝트형식 {"data":[{"postId": 2,"userId": 1,"nickname": "Developer"
-         *                            ,"title": "안녕하세요 2번째 게시글 제목입니다.","createdAt": "2022-07-25T07:45:56.000Z",
-         *                            "updatedAt": "2022-07-25T07:45:56.000Z","likes": 0}]
-         *
-         */
         const posts = await Post.findAll({
             include: [{
                 model: User,
@@ -44,6 +37,7 @@ const findAll = async (req, res) => {
             }],
             order: [['id', 'DESC']]
         })
+
         const data = []
         posts.map((x) => data.push(x))
 
@@ -156,6 +150,17 @@ const postLike = async (req, res) => {
             postId: postId
         });
 
+        const post = await Post.findOne({
+            where: {
+                id: postId
+            }
+        });
+        let count = post.likeCount
+
+        await Post.update({
+            likeCount: parseInt(count + 1)
+        }, {where: {id: postId}})
+
         return res.status(200).json({result: 'success', message: '좋아요 추가 성공'})
 
     } catch (error) {
@@ -180,13 +185,26 @@ const removePostLike = async (req, res) => {
     }
 
     if (isPostLike.userId !== user.id) {
-        return res.status(401).json({message: "작성자의 좋아요 아닙니다."})
+        return res.status(401).json({message: "작성자의 좋아요가 아닙니다."})
     }
 
     try {
         await PostLike.destroy({
             where: {postId}
         })
+
+        const post = await Post.findOne({
+            where: {
+                id: postId
+            }
+        });
+        let count = post.likeCount
+
+        if (count !== null) {
+            await Post.update({
+                likeCount: count - 1
+            }, {where: {id: postId}})
+        }
 
         return res.status(200).json({result: 'success', message: '좋아요 삭제 성공'})
 
