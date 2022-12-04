@@ -43,10 +43,10 @@ const findAll = async (req, res) => {
             }],
             order: [['id', 'DESC']]
         })
-        const temp = []
-        posts.map((x) => temp.push(x))
+        const data = []
+        posts.map((x) => data.push(x))
 
-        return res.status(200).json({result: "success", date: temp})
+        return res.status(200).json({result: "success", date: data})
     } catch (error) {
         console.error(error);
         return res.status(500).json({result: 'fail', message: "server error"})

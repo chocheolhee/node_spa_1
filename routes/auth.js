@@ -92,7 +92,7 @@ const login = async (req, res) => {
             return res.status(412).json({errorMessage: "닉네임 또는 패스워드가 틀렸습니다."});
         }
 
-        const token = jwt.sign({userId: user.userId}, "mysecretkey")
+        const token = jwt.sign({userId: user.id}, "mysecretkey")
         res.cookie('token', token);
 
         return res.status(200).json({result: "success", "token": token})
