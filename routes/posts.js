@@ -175,6 +175,10 @@ const postLike = async (req, res) => {
         return res.status(400).json({result: 'fail', message: '게시글이 없습니다.'})
     }
 
+    /**
+     * TODO 좋아요 중복 체크 로직
+     */
+
     try {
         await PostLike.create({
             userId: user.id,

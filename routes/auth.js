@@ -3,6 +3,7 @@ const router = express.Router();
 const {User} = require('../models')
 const jwt = require("jsonwebtoken");
 const isNotLoggedIn = require("../middlewares/auth-isNotLoggedIn-middleware");
+require('dotenv').config();
 
 /**
  * 회원가입
@@ -92,7 +93,7 @@ const login = async (req, res) => {
             return res.status(412).json({errorMessage: "닉네임 또는 패스워드가 틀렸습니다."});
         }
 
-        const token = jwt.sign({userId: user.id}, "mysecretkey")
+        const token = jwt.sign({userId: user.id}, process.env.JWT_SECRET_KEY)
         res.cookie('token', token);
 
         return res.status(200).json({result: "success", "token": token})
